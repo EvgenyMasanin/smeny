@@ -65,11 +65,7 @@ function render() {
     const b = el('button', `day s${mask}${k === todayKey ? ' today' : ''}`);
     b.append(el('span', '', d), el('small', '', LABEL[mask]));
     b.ariaLabel = `${dayName.format(new Date(y, m, d))}, ${SPOKEN[mask]}`;
-    b.onclick = () => {
-      const next = (mask + 1) % 4;
-      if (next) state.days[k] = next; else delete state.days[k];
-      save(); render();
-    };
+    b.onclick = () => editing && openDay(k, new Date(y, m, d));
     grid.append(b);
   }
 
@@ -103,6 +99,32 @@ function renderSummary() {
 
 $('#prev').onclick = () => { if (--m < 0) { m = 11; y--; } render(); };
 $('#next').onclick = () => { if (++m > 11) { m = 0; y++; } render(); };
+
+// ---------- Режим редактирования ----------
+// Вне режима нажатие на день ничего не меняет — защита от случайных касаний
+
+let editing = false, editKey = null;
+const setEditing = on => { editing = on; document.body.classList.toggle('editing', on); };
+$('#editBtn').onclick = () => setEditing(true);
+$('#doneBtn').onclick = () => setEditing(false);
+
+const dayDlg = $('#dayDlg');
+function openDay(k, date) {
+  editKey = k;
+  $('#dayTitle').textContent = dayName.format(date);
+  $('#choice1').textContent = `1-я смена ${span(state.settings.s1)}`;
+  $('#choice2').textContent = `2-я смена ${span(state.settings.s2)}`;
+  const cur = state.days[k] || 0;
+  for (const b of dayDlg.querySelectorAll('.choice')) b.ariaCurrent = Number(b.value) === cur ? 'true' : null;
+  dayDlg.returnValue = '';
+  dayDlg.showModal();
+}
+dayDlg.onclose = () => {
+  const v = dayDlg.returnValue;
+  if (!['0', '1', '2', '3'].includes(v)) return; // «Отмена» или Esc
+  if (v === '0') delete state.days[editKey]; else state.days[editKey] = Number(v);
+  save(); render();
+};
 
 // ---------- Заполнить 2/2 ----------
 

@@ -55,6 +55,11 @@
   .level { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
   .level input { width: 64px; }
   .level button { margin-left: auto; min-width: 44px; padding: 0; }
+  body:not(.editing) .edit-only, body.editing .view-only { display: none; }
+  body.editing .grid { outline: 2px dashed var(--s1); outline-offset: 6px; border-radius: 12px; }
+  .choices { display: grid; gap: 8px; }
+  .choice { justify-content: flex-start; gap: 10px; }
+  .choice[aria-current=true] { border: 2px solid var(--fg); }
   .colors { display: flex; gap: 8px; }
   .colors label { flex: 1; font-size: 14px; }
   input[type=color] { padding: 2px; height: 44px; }
@@ -72,11 +77,26 @@
   <div id="legend" class="legend"></div>
   <section id="summary" class="card" aria-live="polite"></section>
   <div class="actions">
-    <button id="fillBtn">Заполнить 2/2</button>
-    <button id="shareBtn" class="primary">Поделиться</button>
+    <button id="editBtn" class="view-only">Редактировать</button>
+    <button id="shareBtn" class="primary view-only">Поделиться</button>
+    <button id="fillBtn" class="edit-only">Заполнить 2/2</button>
+    <button id="doneBtn" class="primary edit-only">Готово</button>
   </div>
-  <p class="hint">Нажмите на день: 1-я смена → 2-я → обе → пусто.</p>
+  <p class="hint"><span class="view-only">Чтобы отметить смены, нажмите «Редактировать».</span><span class="edit-only">Нажмите на день, чтобы выбрать смену.</span></p>
 </main>
+
+<dialog id="dayDlg">
+  <form method="dialog">
+    <h2 id="dayTitle"></h2>
+    <div class="choices">
+      <button value="1" class="choice"><span class="chip" style="background:var(--s1);color:var(--f1)">1</span><span id="choice1"></span></button>
+      <button value="2" class="choice"><span class="chip" style="background:var(--s2);color:var(--f2)">2</span><span id="choice2"></span></button>
+      <button value="3" class="choice"><span class="chip" style="background:var(--s3);color:var(--f3)">1+2</span>Обе смены</button>
+      <button value="0" class="choice">Нет смены</button>
+    </div>
+    <div class="actions"><button value="cancel">Отмена</button></div>
+  </form>
+</dialog>
 
 <dialog id="fillDlg">
   <form method="dialog" id="fillForm">
