@@ -224,8 +224,8 @@ function drawMonth() {
   for (let d = 1; d <= dim; d++) {
     const i = offset + d - 1, x = P + (i % 7) * C, yy = top + Math.floor(i / 7) * C;
     const mask = state.days[dayKey(y, m, d)] || 0;
-    g.fillStyle = mask ? colors[`s${mask}`] : '#f1f5f9';
-    g.beginPath(); g.roundRect(x + 6, yy + 6, C - 12, C - 12, 20); g.fill();
+    g.fillStyle = mask ? colors[`s${mask}`] : '#e8edf3';
+    g.beginPath(); g.roundRect(x + 10, yy + 10, C - 20, C - 20, 18); g.fill();
     g.fillStyle = mask ? textOn(colors[`s${mask}`]) : '#334155';
     g.font = `600 40px ${FONT}`; g.fillText(d, x + C / 2, yy + C * 0.36);
     if (mask) { g.font = `800 30px ${FONT}`; g.fillText(LABEL[mask], x + C / 2, yy + C * 0.7); }

@@ -11,7 +11,7 @@
 <style>
   :root {
     color-scheme: light dark;
-    --bg: #fff; --fg: #0f172a; --muted: #64748b; --cell: #f1f5f9; --card: #f8fafc; --line: #e2e8f0;
+    --bg: #fff; --fg: #0f172a; --muted: #64748b; --cell: #e8edf3; --card: #f8fafc; --line: #e2e8f0;
     --s1: #0e7490; --s2: #be123c; --s3: #6d28d9; --f1: #fff; --f2: #fff; --f3: #fff; /* app.js перезаписывает из настроек */
   }
   :root[data-theme=light] { color-scheme: light; }
@@ -29,9 +29,9 @@
   button, .btn { font: inherit; border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 12px; padding: 10px 14px; min-height: 44px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
   .icon { font-size: 24px; min-width: 44px; padding: 0; }
   .primary { background: var(--s1); border-color: var(--s1); color: var(--f1); }
-  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
   .wd { text-align: center; font-size: 13px; color: var(--muted); padding: 4px 0; }
-  .day { aspect-ratio: 1; min-height: 0; padding: 2px; border: 0; border-radius: 10px; background: var(--cell); flex-direction: column; gap: 0; font-size: 16px; }
+  .day { aspect-ratio: 1; width: 100%; min-height: 48px; /* width: иначе ширину задаёт min-height через aspect-ratio */ padding: 2px; border: 0; border-radius: 10px; background: var(--cell); flex-direction: column; gap: 0; font-size: 16px; }
   .day small { font-size: 12px; font-weight: 700; min-height: 1.2em; }
   .s1 { background: var(--s1); color: var(--f1); }
   .s2 { background: var(--s2); color: var(--f2); }
