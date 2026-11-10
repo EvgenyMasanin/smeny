@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Смены">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Календарь смен</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #fff; --fg: #0f172a; --muted: #64748b; --cell: #f1f5f9; --card: #f8fafc; --line: #e2e8f0;
+    --s1: #2563eb; --s2: #c2410c; --s3: #7c3aed;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0b1120; --fg: #e2e8f0; --muted: #94a3b8; --cell: #1e293b; --card: #111827; --line: #334155; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.4 -apple-system, system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+  main { max-width: 480px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 16px); }
+  header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  h1 { flex: 1; text-align: center; font-size: 20px; margin: 0; }
+  h2 { font-size: 20px; margin: 0 0 12px; }
+  button, .btn { font: inherit; border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 12px; padding: 10px 14px; min-height: 44px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+  .icon { font-size: 24px; min-width: 44px; padding: 0; }
+  .primary { background: var(--s1); border-color: var(--s1); color: #fff; }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .wd { text-align: center; font-size: 13px; color: var(--muted); padding: 4px 0; }
+  .day { aspect-ratio: 1; min-height: 0; padding: 2px; border: 0; border-radius: 10px; background: var(--cell); flex-direction: column; gap: 0; font-size: 16px; }
+  .day small { font-size: 12px; font-weight: 700; min-height: 1.2em; }
+  .s1 { background: var(--s1); color: #fff; }
+  .s2 { background: var(--s2); color: #fff; }
+  .s3 { background: var(--s3); color: #fff; }
+  .today { outline: 2px solid var(--fg); outline-offset: 1px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; color: var(--muted); margin: 10px 0; }
+  .chip { display: inline-block; min-width: 22px; padding: 0 4px; border-radius: 6px; color: #fff; font-weight: 700; text-align: center; margin-right: 4px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+  .big { font-size: 22px; font-weight: 700; }
+  .row { display: flex; justify-content: space-between; margin-top: 6px; }
+  .hint, .muted { color: var(--muted); font-size: 14px; margin: 6px 0 0; }
+  .actions { display: flex; gap: 8px; margin-top: 12px; }
+  .actions > * { flex: 1; }
+  dialog { width: min(100vw - 24px, 440px); max-height: 90vh; border: 1px solid var(--line); border-radius: 16px; background: var(--bg); color: var(--fg); padding: 16px; }
+  dialog::backdrop { background: rgb(0 0 0 / .4); }
+  fieldset { border: 1px solid var(--line); border-radius: 12px; margin: 0 0 12px; padding: 8px 12px 12px; }
+  legend { font-weight: 600; padding: 0 4px; }
+  label { display: block; margin-bottom: 12px; }
+  input, select { font: inherit; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--fg); min-height: 44px; }
+  label > input, label > select { display: block; width: 100%; margin-top: 4px; }
+  .level { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .level input { width: 64px; }
+  .level button { margin-left: auto; min-width: 44px; padding: 0; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <button id="prev" class="icon" aria-label="Предыдущий месяц">‹</button>
+    <h1 id="title"></h1>
+    <button id="next" class="icon" aria-label="Следующий месяц">›</button>
+    <button id="settingsBtn" class="icon" aria-label="Настройки">⚙︎</button>
+  </header>
+  <div id="grid" class="grid"></div>
+  <div id="legend" class="legend"></div>
+  <section id="summary" class="card" aria-live="polite"></section>
+  <div class="actions">
+    <button id="fillBtn">Заполнить 2/2</button>
+    <button id="shareBtn" class="primary">Поделиться</button>
+  </div>
+  <p class="hint">Нажмите на день: 1-я смена → 2-я → обе → пусто.</p>
+</main>
+
+<dialog id="fillDlg">
+  <form method="dialog" id="fillForm">
+    <h2>Заполнить 2/2</h2>
+    <label>Первый из двух рабочих дней <input type="date" name="start" required></label>
+    <label>Смена в рабочие дни
+      <select name="mask"><option value="1">1-я</option><option value="2">2-я</option><option value="3">Обе</option></select>
+    </label>
+    <p id="fillNote" class="hint"></p>
+    <div class="actions">
+      <button value="cancel" formnovalidate>Отмена</button>
+      <button value="ok" class="primary">Заполнить</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="settingsDlg">
+  <form method="dialog" id="settingsForm">
+    <h2>Настройки</h2>
+    <p id="firstHint" class="hint" hidden>Укажите время смен и ставки — потом можно поменять.</p>
+    <fieldset><legend>1-я смена</legend>
+      <input type="time" name="s1start" required aria-label="Начало 1-й смены"> – <input type="time" name="s1end" required aria-label="Конец 1-й смены">
+    </fieldset>
+    <fieldset><legend>2-я смена</legend>
+      <input type="time" name="s2start" required aria-label="Начало 2-й смены"> – <input type="time" name="s2end" required aria-label="Конец 2-й смены">
+    </fieldset>
+    <label>Оклад за 1 ставку, ₽ <input name="salary" inputmode="numeric" pattern="[\d\s]*" placeholder="например, 50000"></label>
+    <fieldset><legend>Ставка по числу смен в месяце</legend>
+      <div id="levels"></div>
+      <button type="button" id="addLevel">+ Добавить порог</button>
+      <p class="hint">Действует наибольший набранный порог.</p>
+    </fieldset>
+    <div class="actions">
+      <button value="cancel" formnovalidate>Отмена</button>
+      <button value="save" class="primary">Сохранить</button>
+    </div>
+    <fieldset style="margin-top:16px"><legend>Резервная копия</legend>
+      <div class="actions">
+        <button type="button" id="exportBtn">Сохранить копию</button>
+        <label class="btn" style="margin:0">Загрузить копию<input type="file" id="importFile" accept=".json,application/json" hidden></label>
+      </div>
+      <p class="hint">Данные хранятся только на этом телефоне: удалите иконку — удалятся и они. Сохраняйте копию раз в месяц.</p>
+    </fieldset>
+  </form>
+</dialog>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
