@@ -278,4 +278,8 @@ applyLook();
 render();
 if (firstRun) { $('#firstHint').hidden = false; openSettings(); }
 navigator.storage?.persist?.(); // просим iOS не вычищать данные при нехватке места
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+if ('serviceWorker' in navigator) {
+  // Пришёл новый service worker — перезапускаемся, чтобы страница и код были одной версии
+  if (navigator.serviceWorker.controller) navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
+  navigator.serviceWorker.register('sw.js');
+}
