@@ -1,6 +1,6 @@
 // Запуск: node calc.test.mjs
 import assert from 'node:assert/strict';
-import { monthCount, rateFor, fill22, isBackup } from './calc.js';
+import { monthCount, rateFor, fill22, isBackup, textOn } from './calc.js';
 
 const levels = [{ from: 10, rate: 1 }, { from: 2, rate: 0.25 }, { from: 15, rate: 1.5 }, { from: 5, rate: 0.5 }];
 assert.deepEqual(rateFor(0, levels), { rate: 0, next: { from: 2, rate: 0.25 } });
@@ -44,5 +44,13 @@ assert.ok(isBackup(good));
 assert.ok(!isBackup(null));
 assert.ok(!isBackup({ ...good, days: { '2026-11-01': 4 } }));
 assert.ok(!isBackup({ ...good, settings: { ...good.settings, s1: { start: '<b>', end: '14:00' } } }));
+assert.ok(isBackup({ ...good, settings: { ...good.settings, colors: { s1: '#0e7490', s2: '#BE123C', s3: '#6d28d9' }, theme: 'dark' } }));
+assert.ok(!isBackup({ ...good, settings: { ...good.settings, colors: { s1: 'red;x:1', s2: '#be123c', s3: '#6d28d9' } } }));
+assert.ok(!isBackup({ ...good, settings: { ...good.settings, theme: 'neon' } }));
+
+assert.equal(textOn('#0e7490'), '#ffffff');
+assert.equal(textOn('#000000'), '#ffffff');
+assert.equal(textOn('#facc15'), '#0f172a');
+assert.equal(textOn('#ffffff'), '#0f172a');
 
 console.log('ok');

@@ -12,12 +12,15 @@
   :root {
     color-scheme: light dark;
     --bg: #fff; --fg: #0f172a; --muted: #64748b; --cell: #f1f5f9; --card: #f8fafc; --line: #e2e8f0;
-    --s1: #2563eb; --s2: #c2410c; --s3: #7c3aed;
+    --s1: #0e7490; --s2: #be123c; --s3: #6d28d9; --f1: #fff; --f2: #fff; --f3: #fff; /* app.js перезаписывает из настроек */
   }
+  :root[data-theme=light] { color-scheme: light; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #0b1120; --fg: #e2e8f0; --muted: #94a3b8; --cell: #1e293b; --card: #111827; --line: #334155; }
+    :root:not([data-theme=light]) { --bg: #0b1120; --fg: #e2e8f0; --muted: #94a3b8; --cell: #1e293b; --card: #111827; --line: #334155; }
   }
+  :root[data-theme=dark] { color-scheme: dark; --bg: #0b1120; --fg: #e2e8f0; --muted: #94a3b8; --cell: #1e293b; --card: #111827; --line: #334155; }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.4 -apple-system, system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
   main { max-width: 480px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 16px); }
   header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
@@ -25,17 +28,17 @@
   h2 { font-size: 20px; margin: 0 0 12px; }
   button, .btn { font: inherit; border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 12px; padding: 10px 14px; min-height: 44px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
   .icon { font-size: 24px; min-width: 44px; padding: 0; }
-  .primary { background: var(--s1); border-color: var(--s1); color: #fff; }
+  .primary { background: var(--s1); border-color: var(--s1); color: var(--f1); }
   .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
   .wd { text-align: center; font-size: 13px; color: var(--muted); padding: 4px 0; }
   .day { aspect-ratio: 1; min-height: 0; padding: 2px; border: 0; border-radius: 10px; background: var(--cell); flex-direction: column; gap: 0; font-size: 16px; }
   .day small { font-size: 12px; font-weight: 700; min-height: 1.2em; }
-  .s1 { background: var(--s1); color: #fff; }
-  .s2 { background: var(--s2); color: #fff; }
-  .s3 { background: var(--s3); color: #fff; }
+  .s1 { background: var(--s1); color: var(--f1); }
+  .s2 { background: var(--s2); color: var(--f2); }
+  .s3 { background: var(--s3); color: var(--f3); }
   .today { outline: 2px solid var(--fg); outline-offset: 1px; }
   .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; color: var(--muted); margin: 10px 0; }
-  .chip { display: inline-block; min-width: 22px; padding: 0 4px; border-radius: 6px; color: #fff; font-weight: 700; text-align: center; margin-right: 4px; }
+  .chip { display: inline-block; min-width: 22px; padding: 0 4px; border-radius: 6px; font-weight: 700; text-align: center; margin-right: 4px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
   .big { font-size: 22px; font-weight: 700; }
   .row { display: flex; justify-content: space-between; margin-top: 6px; }
@@ -52,6 +55,9 @@
   .level { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
   .level input { width: 64px; }
   .level button { margin-left: auto; min-width: 44px; padding: 0; }
+  .colors { display: flex; gap: 8px; }
+  .colors label { flex: 1; font-size: 14px; }
+  input[type=color] { padding: 2px; height: 44px; }
 </style>
 </head>
 <body>
@@ -102,6 +108,21 @@
       <div id="levels"></div>
       <button type="button" id="addLevel">+ Добавить порог</button>
       <p class="hint">Действует наибольший набранный порог.</p>
+    </fieldset>
+    <fieldset><legend>Оформление</legend>
+      <div class="colors">
+        <label>1-я смена <input type="color" name="c1"></label>
+        <label>2-я смена <input type="color" name="c2"></label>
+        <label>Обе <input type="color" name="c3"></label>
+      </div>
+      <button type="button" id="resetColors">Вернуть цвета по умолчанию</button>
+      <label style="margin: 12px 0 0">Тема
+        <select name="theme">
+          <option value="auto">Как на телефоне</option>
+          <option value="light">Светлая</option>
+          <option value="dark">Тёмная</option>
+        </select>
+      </label>
     </fieldset>
     <div class="actions">
       <button value="cancel" formnovalidate>Отмена</button>
